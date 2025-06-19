@@ -5,6 +5,8 @@
 package com.cursojava.curso.controllers;
 import com.cursojava.curso.dao.UsuarioDao;
 import com.cursojava.curso.models.Usuario;
+import de.mkammerer.argon2.Argon2;
+import de.mkammerer.argon2.Argon2Factory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -55,6 +57,14 @@ public class UsuarioController{
 
     @RequestMapping(value = "api/usuarios", method = RequestMethod.POST)
     public void registrarUsuario(@RequestBody Usuario usuario){ // Aquí como la función no va a retornar nada, al lado de la palabra "public", escribimos "void"
+
+        //En las siguientes 1 línwas estamos encriptando la contraseña mediante el uso de la librería ARGON2 que agregamos manualmente como dependencia en el POM, desconozco cómo funciona a fondo, pero puedo usar este ejemplo para futuros proyectos
+        Argon2 argon2 = Argon2Factory.create(Argon2Factory.Argon2Types.ARGON2id);
+        String hash = argon2.hash(1, 1024, 1, usuario.getPassword()); // dentro de la varible HASH guardamos la contraseña encriptada, notemos que en el último parámetro estamos usando el método getPassword() creado en el modelo Usuario
+
+        usuario.setPassword(hash); // Mediante el método setPassword creado en el Modelo Usuario, estamos asignandole el valor de la variable HASH
+
+        //usuario.setTelefono("123456789"); de esta forma podríamos insertar
         usuarioDao.registrar(usuario);
     }
 
